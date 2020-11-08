@@ -1,0 +1,18 @@
+Field as shown on the website,Field,Value,Result,,,,
+Facturación media de los últimos 3 año (en €):	,Revenue,10000000,1,,Total score,10,
+Años consecutivos creciendo ingreso: ,Years of growth,1,0,,,,
+EBITDA media de los últimos 3 años (en €): ,Avg. EBITDA last 3 years,1000000,1,,Decision,Go,
+Resultado neto medio de los últimos 3 años (en €): ,Avg. net result last 3 years,800000,1
+Años consecutivos con resultado positivo: ,Years with positive net results,1,0
+Deuda financiera neta total (en €): ,Net debt,1000000,1
+Total activo inmovilizado (en €): ,Fixed assets,30000000,0
+¿Porcentaje de la empresa del mayor accionista?: ,% biggest shareholder,70,1
+Porcentaje de facturación que viene del mayor cliente: ,% revenue from biggest client,50,0
+¿Ha sido auditada la compañía alguna vez?: ,Is the company audited? (yes/ no),Yes,1
+¿Operaciones de compra o fusiones en los últimos 5 años? ,m&a in the last 5 years? (yes/ no),No,1
+¿Se quiere vender más del 90% de la compañía? ,Selling 90%? (yes/ no),Yes,1
+
+,EBITDA/Rev,10,1
+,Net margin,8,1
+,Deuda/EBITDA,1,
+,Asset to revenue ratio,3,
