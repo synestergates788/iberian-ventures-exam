@@ -1,6 +1,6 @@
 ## Config
 
-- step 1: clone the project repo.
+- step 1: clone the project repo 'git clone https://github.com/synestergates788/iberian-ventures-exam.git'.
 - step 2: run 'composer install'
 - step 3: create database 'ibventures'
 - step 4: run 'php artisan migrate'
