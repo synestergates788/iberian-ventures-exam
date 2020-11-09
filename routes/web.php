@@ -23,5 +23,3 @@ Route::get('/client-form', function () {
 
 Route::get('client-actions','Client@addRecord');
 Route::post('client-actions','Client@addRecord');
-Route::get('send-email','Client@sendEmail');
-Route::get('email-attachment','Client@attachment');

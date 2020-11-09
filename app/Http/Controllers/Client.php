@@ -7,6 +7,8 @@ use App\Models\Client as ClientModel;
 use App\Mail\DecisionEmail;
 use phpDocumentor\Reflection\Types\String_;
 use Illuminate\Support\Facades\File;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Client extends Controller
 {
@@ -122,42 +124,6 @@ class Client extends Controller
             $deuda_ebitda_score + $assset_to_revenue_score + $biggest_shareholder_score + $revenue_from_biggest_client_score + $is_the_company_audited_score +
             $m_and_a_in_last_5_yrs_score + $selling_90_percent_score + $ebitda_rev_score + $net_margin_score;
 
-        $attachmentData = [
-            'company_sector'                  => $company_sector,
-            'contact_email'                   => $contact_email,
-            'revenue'                         => $revenue,
-            'revenue_score'                         => $revenue_score,
-            'years_of_growth'                 => $yrs_of_growth,
-            'yrs_of_growth_score'                 => $yrs_of_growth_score ,
-            'avg_ebitda_last_three_yrs'       => $avg_ebitda_last_three_yrs,
-            'avg_ebitda_last_three_yrs_score'       => $avg_ebitda_last_three_yrs_score ,
-            'avg_net_last_three_yrs'          => $avg_net_last_three_yrs,
-            'avg_net_last_three_yrs_score'          => $avg_net_last_three_yrs_score ,
-            'yrs_with_positive_net_result'    => $yrs_with_positive_net_result,
-            'yrs_with_positive_net_result_score'    => $yrs_with_positive_net_result_score ,
-            'net_debt'                        => $net_debt,
-            'deuda_ebitda_score'                        => $deuda_ebitda_score ,
-            'fixed_assets'                    => $fixed_assets,
-            'assset_to_revenue_score'                    => $assset_to_revenue_score ,
-            'biggest_shareholder'             => $biggest_shareholder,
-            'biggest_shareholder_score'             => $biggest_shareholder_score ,
-            'revenue_from_biggest_client'     => $revenue_from_biggest_client,
-            'revenue_from_biggest_client_score'     => $revenue_from_biggest_client_score ,
-            'is_the_company_audited'          => $is_the_company_audited,
-            'is_the_company_audited_score'          => $is_the_company_audited_score ,
-            'm_and_a_in_last_5_yrs'           => $m_and_a_in_last_5_yrs,
-            'm_and_a_in_last_5_yrs_score'           => $m_and_a_in_last_5_yrs_score ,
-            'selling_90_percent'              => $selling_90_percent,
-            'selling_90_percent_score'              => $selling_90_percent_score ,
-            'ebitda_rev'                      => $ebitda_rev,
-            'ebitda_rev_score'                      => $ebitda_rev_score ,
-            'net_margin'                      => $net_margin,
-            'net_margin_score'                      => $net_margin_score ,
-            'deuda_ebitda'                    => $deuda_ebitda,
-            'asset_to_revenue_ratio'          => $asset_to_revenue_ratio,
-            'total_score'                     => $score
-        ];
-
         $SQLData = [
             'company_sector'                  => $company_sector,
             'contact_email'                   => $contact_email,
@@ -181,18 +147,16 @@ class Client extends Controller
         ];
 
         if($score >= 10){
-            $attachmentData['decision'] = 'Go';
             $SQLData['decision'] = 'Go';
         }else{
-            $attachmentData['decision'] = 'No-Go';
             $SQLData['decision'] = 'No-Go';
         }
 
         /*save attachment*/
-        $this->attachment($attachmentData);
+        $this->attachment($SQLData);
 
         /*send email*/
-        $this->sendEmail('melquecedec.catangcatang@outlook.com','','');
+        $this->sendEmail('luis@ibventur.es','','');
 
         $result = ClientModel::insert($SQLData);
         if($result){
@@ -238,49 +202,95 @@ class Client extends Controller
     }
 
     public function attachment($data){
-        File::delete(public_path() . '/Typeform-validation-exercise.csv');
+        File::delete(public_path() . '/Typeform-validation-exercise.xlsx');
 
-        $content = 'Field as shown on the website,Field,Value,Result,,,,';
-        $content .= "\n";
-        $content .= 'Facturación media de los últimos 3 año (en €):	,Revenue,'.$data['revenue'].','.$data['revenue_score'].',,Total score,'.$data['total_score'].',';
-        $content .= "\n";
-        $content .= 'Años consecutivos creciendo ingreso: ,Years of growth,'.$data['years_of_growth'].','.$data['yrs_of_growth_score'].',,,,';
-        $content .= "\n";
-        $content .= 'EBITDA media de los últimos 3 años (en €): ,Avg. EBITDA last 3 years,'.$data['avg_ebitda_last_three_yrs'].','.$data['avg_ebitda_last_three_yrs_score'].',,Decision,'.$data['decision'].',';
-        $content .= "\n";
-        $content .= 'Resultado neto medio de los últimos 3 años (en €): ,Avg. net result last 3 years,'.$data['avg_net_last_three_yrs'].','.$data['avg_net_last_three_yrs_score'].'';
-        $content .= "\n";
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-        $content .= 'Años consecutivos con resultado positivo: ,Years with positive net results,'.$data['yrs_with_positive_net_result'].','.$data['yrs_with_positive_net_result_score'].'';
-        $content .= "\n";
-        $content .= 'Deuda financiera neta total (en €): ,Net debt,'.$data['net_debt'].','.$data['deuda_ebitda_score'].'';
-        $content .= "\n";
-        $content .= 'Total activo inmovilizado (en €): ,Fixed assets,'.$data['fixed_assets'].','.$data['assset_to_revenue_score'].'';
-        $content .= "\n";
-        $content .= '¿Porcentaje de la empresa del mayor accionista?: ,% biggest shareholder,'.$data['biggest_shareholder'].','.$data['biggest_shareholder_score'].'';
-        $content .= "\n";
-        $content .= 'Porcentaje de facturación que viene del mayor cliente: ,% revenue from biggest client,'.$data['revenue_from_biggest_client'].','.$data['revenue_from_biggest_client_score'].'';
-        $content .= "\n";
-        $content .= '¿Ha sido auditada la compañía alguna vez?: ,Is the company audited? (yes/ no),'.$data['is_the_company_audited'].','.$data['is_the_company_audited_score'].'';
-        $content .= "\n";
-        $content .= '¿Operaciones de compra o fusiones en los últimos 5 años? ,m&a in the last 5 years? (yes/ no),'.$data['m_and_a_in_last_5_yrs'].','.$data['m_and_a_in_last_5_yrs_score'].'';
-        $content .= "\n";
-        $content .= '¿Se quiere vender más del 90% de la compañía? ,Selling 90%? (yes/ no),'.$data['selling_90_percent'].','.$data['selling_90_percent_score'].'';
+        $sheet->setCellValue('A1', 'Field as shown on the website');
+        $sheet->setCellValue('B1', 'Field');
+        $sheet->setCellValue('C1', 'Value');
+        $sheet->setCellValue('D1', 'Result');
+        $sheet->setCellValue('F2', 'Total score'); //score
+        $sheet->setCellValue('G2', '=SUM(D2:D1009)'); //total score
+        $sheet->setCellValue('F4', 'Decision');
+        $sheet->setCellValue('G4', '=IF(G2>=10,"GO","NO-GO")'); //decision
 
-        $content .= "\n";
-        $content .= "\n";
-        $content .= ',EBITDA/Rev,'.$data['ebitda_rev'].','.$data['ebitda_rev_score'].'';
-        $content .= "\n";
-        $content .= ',Net margin,'.$data['net_margin'].','.$data['net_margin_score'].'';
-        $content .= "\n";
-        $content .= ',Deuda/EBITDA,'.$data['deuda_ebitda'].',';
-        $content .= "\n";
-        $content .= ',Asset to revenue ratio,'.$data['asset_to_revenue_ratio'].',';
+        $sheet->setCellValue('A2', 'Facturación media de los últimos 3 año (en €):');
+        $sheet->setCellValue('B2', 'Revenue');
+        $sheet->setCellValue('C2', $data['revenue']); //Revenue value
+        $sheet->setCellValue('D2', '=IF(AND(C2>=1500000,C2<=10000000),1,0)');
 
-        $fp = fopen(public_path() . '/Typeform-validation-exercise.csv', 'wb');
-        fwrite($fp, $content);
-        fclose($fp);
+        $sheet->setCellValue('A3', 'Años consecutivos creciendo ingreso:');
+        $sheet->setCellValue('B3', 'Years of growth');
+        $sheet->setCellValue('C3', $data['years_of_growth']); //value
+        $sheet->setCellValue('D3', '=IF(C3>=3,1,0)');
 
-        return true;
+        $sheet->setCellValue('A4', 'EBITDA media de los últimos 3 años (en €):');
+        $sheet->setCellValue('B4', 'Avg. EBITDA last 3 years');
+        $sheet->setCellValue('C4', $data['avg_ebitda_last_three_yrs']); //value
+        $sheet->setCellValue('D4', '=IF(C4>=150000,1,-100)');
+
+        $sheet->setCellValue('A5', 'Resultado neto medio de los últimos 3 años (en €):');
+        $sheet->setCellValue('B5', 'Avg. net result last 3 years');
+        $sheet->setCellValue('C5', $data['avg_net_last_three_yrs']); //value
+        $sheet->setCellValue('D5', '=IF(C5>=70000,1,0)');
+
+        $sheet->setCellValue('A6', 'Años consecutivos con resultado positivo:');
+        $sheet->setCellValue('B6', 'Years with positive net results');
+        $sheet->setCellValue('C6', $data['yrs_with_positive_net_result']); //value
+        $sheet->setCellValue('D6', '=IF(C6>=3,1,0)');
+
+        $sheet->setCellValue('A7', 'Deuda financiera neta total (en €):');
+        $sheet->setCellValue('B7', 'Net debt');
+        $sheet->setCellValue('C7', $data['net_debt']); //value
+        $sheet->setCellValue('D7', '=IF(C17<=2,1,IF(C17>3,-100,0))');
+
+        $sheet->setCellValue('A8', 'Total activo inmovilizado (en €):');
+        $sheet->setCellValue('B8', 'Fixed assets');
+        $sheet->setCellValue('C8', $data['fixed_assets']); //value
+        $sheet->setCellValue('D8', '=IF(C18<=1.5,1,0)');
+
+        $sheet->setCellValue('A9', '¿Porcentaje de la empresa del mayor accionista?:');
+        $sheet->setCellValue('B9', '% biggest shareholder');
+        $sheet->setCellValue('C9', $data['biggest_shareholder']); //value
+        $sheet->setCellValue('D9', '=IF(C9>=65%,1,0)');
+
+        $sheet->setCellValue('A10', 'Porcentaje de facturación que viene del mayor cliente:	');
+        $sheet->setCellValue('B10', '% revenue from biggest client');
+        $sheet->setCellValue('C10', $data['revenue_from_biggest_client']); //value
+        $sheet->setCellValue('D10', '=IF(C10<=40%,1,0)');
+
+        $sheet->setCellValue('A11', '¿Ha sido auditada la compañía alguna vez?:');
+        $sheet->setCellValue('B11', 'Is the company audited? (yes/ no)');
+        $sheet->setCellValue('C11', strtolower($data['is_the_company_audited'])); //value
+        $sheet->setCellValue('D11', '=IF(C11="yes",1,0)');
+
+        $sheet->setCellValue('A12', '¿Operaciones de compra o fusiones en los últimos 5 años?');
+        $sheet->setCellValue('B12', 'm&a in the last 5 years? (yes/ no)');
+        $sheet->setCellValue('C12', strtolower($data['m_and_a_in_last_5_yrs'])); //value
+        $sheet->setCellValue('D12', '=IF(C12="no",1,0)');
+
+        $sheet->setCellValue('A13', '¿Se quiere vender más del 90% de la compañía?');
+        $sheet->setCellValue('B13', 'Selling 90%? (yes/ no)');
+        $sheet->setCellValue('C13', strtolower($data['selling_90_percent'])); //value
+        $sheet->setCellValue('D13', '=IF(C13="yes",1,-100)');
+
+        $sheet->setCellValue('B15', 'EBITDA/Rev');
+        $sheet->setCellValue('C15', '=IF(C2=0,C2,C4/C2)');
+        $sheet->setCellValue('D15', '=IF(C15>=7%,1,0)');
+
+        $sheet->setCellValue('B16', 'Net margin');
+        $sheet->setCellValue('C16', '=IF(C2=0,C2,C5/C2)');
+        $sheet->setCellValue('D16', '=IF(C16>=5%,1,0)');
+
+        $sheet->setCellValue('B17', 'Deuda/EBITDA');
+        $sheet->setCellValue('C17', '=IF(C4=0,C4,C7/C4)');
+
+        $sheet->setCellValue('B18', 'Asset to revenue ratio');
+        $sheet->setCellValue('C18', '=IF(C2=0,C2,C8/C2)');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save(public_path() . '/Typeform-validation-exercise.xlsx');
     }
 }

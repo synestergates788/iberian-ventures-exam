@@ -32,6 +32,6 @@ class DecisionEmail extends Mailable
     {
         return $this->subject('Iberian Ventures Exam')
             ->view('emails.decisionEmail')
-            ->attach(public_path() . '/Typeform-validation-exercise.csv');
+            ->attach(public_path() . '/Typeform-validation-exercise.xlsx');
     }
 }
